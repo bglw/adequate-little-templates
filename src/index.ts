@@ -18,7 +18,7 @@ export type TemplateData = { [k: string]: Value };
 /**
  * A compiled template function. Call with data to render the template.
  */
-export type Template = (data: TemplateData) => string;
+export type Template<T = TemplateData> = (data: T) => string;
 
 /**
  * A custom function that can be registered with registerFunction().
@@ -291,7 +291,7 @@ const rn = (nodes: Node[], ctx: TemplateData): string => {
 /**
  * Compiles a template string into a reusable Template function.
  */
-export const compile = (tmpl: string): Template => {
+export const compile = <T = TemplateData>(tmpl: string): Template<T> => {
   let src = tmpl,
     pos = 0;
 
@@ -584,14 +584,14 @@ export const compile = (tmpl: string): Template => {
 
   // Parse template into AST and return render function
   const ast = parseNodes();
-  return (data: TemplateData) => rn(ast, data);
+  return (data: T) => rn(ast, data as TemplateData);
 };
 
 /**
  * Compiles and immediately renders a template with the given data.
  */
-export const render = (tmpl: string, data: TemplateData): string =>
-  compile(tmpl)(data);
+export const render = <T = TemplateData>(tmpl: string, data: T): string =>
+  compile<T>(tmpl)(data);
 
 /**
  * Registers a custom function that can be called from templates.
