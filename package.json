@@ -1,6 +1,6 @@
 {
   "name": "adequate-little-templates",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimal, CSP-safe templating language",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
