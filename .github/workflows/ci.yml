@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+  size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check gzipped size
+        run: |
+          MAX_SIZE=3000
+          SIZE=$(gzip -c dist/index.js | wc -c)
+          echo "Gzipped size: ${SIZE} bytes"
+          echo "Max allowed: ${MAX_SIZE} bytes"
+          if [ "$SIZE" -gt "$MAX_SIZE" ]; then
+            echo "::error::Bundle size ${SIZE} bytes exceeds limit of ${MAX_SIZE} bytes"
+            exit 1
+          fi
+          echo "✓ Size check passed (${SIZE}/${MAX_SIZE} bytes)"
