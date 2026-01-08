@@ -1,5 +1,7 @@
 # Adequate Little Templates
 
+[![npm version](https://img.shields.io/npm/v/adequate-little-templates.svg)](https://www.npmjs.com/package/adequate-little-templates)
+
 A minimal, CSP-safe templating language. Unlike the micro templates I could find, this does not compile to a JavaScript function requiring `eval` or equivalent, so it will run in more contexts and be safer for untrusted input.
 
 Currently: ~3KB gzipped.
