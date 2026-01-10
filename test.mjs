@@ -303,6 +303,86 @@ test("default pipe with empty object", (t) => {
   t.is(render('{{ empty_object | default("fallback") }}', data), "fallback");
 });
 
+test("safeUrl allows relative URLs", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: "/path/to/page" }), "/path/to/page");
+  t.is(render("{{ url | safeUrl }}", { url: "./relative" }), "./relative");
+  t.is(render("{{ url | safeUrl }}", { url: "../parent" }), "../parent");
+});
+
+test("safeUrl allows hash and query URLs", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: "#section" }), "#section");
+  t.is(render("{{ url | safeUrl }}", { url: "?query=1" }), "?query=1");
+});
+
+test("safeUrl allows http and https", (t) => {
+  t.is(
+    render("{{ url | safeUrl }}", { url: "https://example.com" }),
+    "https://example.com",
+  );
+  t.is(
+    render("{{ url | safeUrl }}", { url: "http://example.com/path" }),
+    "http://example.com/path",
+  );
+  t.is(
+    render("{{ url | safeUrl }}", { url: "HTTPS://EXAMPLE.COM" }),
+    "HTTPS://EXAMPLE.COM",
+  );
+});
+
+test("safeUrl allows mailto and tel", (t) => {
+  t.is(
+    render("{{ url | safeUrl }}", { url: "mailto:test@example.com" }),
+    "mailto:test@example.com",
+  );
+  t.is(
+    render("{{ url | safeUrl }}", { url: "tel:+1234567890" }),
+    "tel:+1234567890",
+  );
+});
+
+test("safeUrl blocks javascript protocol", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: "javascript:alert('xss')" }), "");
+  t.is(render("{{ url | safeUrl }}", { url: "JAVASCRIPT:alert(1)" }), "");
+  t.is(
+    render("{{ url | safeUrl }}", { url: "javascript:void(0)" }),
+    "",
+  );
+});
+
+test("safeUrl blocks data protocol", (t) => {
+  t.is(
+    render("{{ url | safeUrl }}", { url: "data:text/html,<script>alert(1)</script>" }),
+    "",
+  );
+});
+
+test("safeUrl blocks vbscript protocol", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: "vbscript:msgbox" }), "");
+});
+
+test("safeUrl returns empty for null/undefined", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: null }), "");
+  t.is(render("{{ url | safeUrl }}", {}), "");
+});
+
+test("safeUrl allows ftp", (t) => {
+  t.is(
+    render("{{ url | safeUrl }}", { url: "ftp://example.com/file.txt" }),
+    "ftp://example.com/file.txt",
+  );
+});
+
+test("safeUrl trims whitespace from valid URLs", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: "  /path  " }), "/path");
+  t.is(render("{{ url | safeUrl }}", { url: "\n/path\n" }), "/path");
+});
+
+test("safeUrl blocks whitespace bypass attempts", (t) => {
+  t.is(render("{{ url | safeUrl }}", { url: "  javascript:alert(1)" }), "");
+  t.is(render("{{ url | safeUrl }}", { url: "\njavascript:alert(1)" }), "");
+  t.is(render("{{ url | safeUrl }}", { url: "\tjavascript:alert(1)" }), "");
+});
+
 test("pipe chaining: multiple pipes", (t) => {
   t.is(render("{{ title | lowercase | truncate(7) }}", data), "getting...");
 });

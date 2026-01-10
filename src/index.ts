@@ -75,8 +75,7 @@ type Expr =
  */
 const truthy = (v: Value): boolean =>
   !(
-    v === null ||
-    v === undefined ||
+    v == null ||
     v === false ||
     v === 0 ||
     v === "" ||
@@ -189,6 +188,13 @@ const fns: { [k: string]: Fn } = {
     const v = ev(a[0], ctx);
     return truthy(v) ? v : ev(a[1], ctx);
   },
+
+  // URL sanitization - derived from Google Closure Library's SafeUrl
+  // Blocks javascript:, data:, vbscript:, etc.
+  safeUrl: (ctx, ...a) => {
+    const u = String(ev(a[0], ctx) ?? "").trim();
+    return u && /^(?:\.{0,2}\/|[#?]|(?:https?|ftp):\/\/|(?:mailto|tel):)/i.test(u) ? u : "";
+  },
 };
 
 /**
@@ -250,7 +256,7 @@ const rn = (nodes: Node[], ctx: TemplateData): string => {
       else if (typeof v === "object" && v !== null)
         out += "[Error: cannot render object]";
       else {
-        const s = v == null ? "" : String(v);
+        const s = String(v ?? "");
         out += n.raw ? s : esc(s);
       }
       continue;

@@ -171,6 +171,28 @@ Output literal `{{` with a backslash:
 | Function | Description |
 |----------|-------------|
 | `default(val, fallback)` | Use fallback if val is falsy |
+| `safeUrl(url)` | Sanitize URL, blocking dangerous protocols |
+
+### URL Sanitization
+
+Use `safeUrl` to protect against `javascript:` and other dangerous URL schemes when rendering user-provided URLs:
+
+```handlebars
+<a href="{{ meta.url | safeUrl }}">{{ title }}</a>
+```
+
+Allowed:
+- Relative URLs: `/path`, `./path`, `../path`, `?query`, `#hash`
+- HTTP(S): `https://example.com`
+- FTP: `ftp://example.com/file.txt`
+- Email: `mailto:user@example.com`
+- Phone: `tel:+1234567890`
+
+Blocked (returns empty string):
+- `javascript:alert('xss')`
+- `data:text/html,...`
+- `vbscript:...`
+- Any other protocol
 
 ## Custom Functions
 
